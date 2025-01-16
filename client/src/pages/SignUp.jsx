@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const SignUp = () => {
   const [formData, setFormData] = useState({ username: '', email: '', password: ''});
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
-
+  const navigate = useNavigate();
   const validateForm = () => {
     const newErrors = {};
     
@@ -65,6 +65,8 @@ const SignUp = () => {
       }
       
       setFormData({ username: '', email: '', password: '' });
+
+      navigate('/sign-in');
       
     } catch (error) {
       console.log(error);
