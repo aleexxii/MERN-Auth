@@ -45,16 +45,16 @@ const SignIn = () => {
       });
       const data = await res.json();
 
-      if (!data.success) {
+      if (data.success == false) {
         setErrors({
           [data.field || "error"]: data.message || "Invalid credentials",
         });
         return;
       }
-      // Reset form
-      setFormData({ email: "", password: "" });
       // Redirect to home page
       navigate("/");
+      // Reset form
+      setFormData({ email: "", password: "" });
     } catch (error) {
       console.log(error);
       setErrors({ error: "Something went wrong!" });
