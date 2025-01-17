@@ -1,14 +1,16 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { signInStart, signInSuccess, signInFail } from "../redux/user/userSlice";
+import { useDispatch, useSelector } from "react-redux";
 
 const SignIn = () => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
-  const [errors, setErrors] = useState({});
-  const [loading, setLoading] = useState(false);
+  const { loading, error } = useSelector((state) => state.user);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -16,26 +18,14 @@ const SignIn = () => {
       ...prev,
       [id]: value,
     }));
-    // Clear error when user starts typing
-    if (errors[id]) {
-      setErrors((prev) => ({
-        ...prev,
-        [id]: "",
-      }));
-    }
+
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!formData.email || !formData.password) {
-      setErrors({ error: "All fields are required" });
-      return;
-    }
+    e.preventDefault();    
 
     try {
-      setLoading(true);
-      setErrors({});
-
+      dispatch(signInStart());
       const res = await fetch("/api/auth/signin", {
         method: "POST",
         headers: {
@@ -46,20 +36,16 @@ const SignIn = () => {
       const data = await res.json();
 
       if (data.success == false) {
-        setErrors({
-          [data.field || "error"]: data.message || "Invalid credentials",
-        });
+        dispatch(signInFail(data));
         return;
       }
+      dispatch(signInSuccess(data));
       // Redirect to home page
       navigate("/");
       // Reset form
       setFormData({ email: "", password: "" });
     } catch (error) {
-      console.log(error);
-      setErrors({ error: "Something went wrong!" });
-    } finally {
-      setLoading(false);
+      dispatch(signInFail(error));
     }
   };
 
@@ -87,9 +73,8 @@ const SignIn = () => {
               className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
               onChange={handleChange}
             />
-            {errors.email && (
-              <p className="text-red-500 text-sm mt-1">{errors.email}</p>
-            )}
+            
+           
           </div>
 
           <div className="space-y-2">
@@ -109,9 +94,7 @@ const SignIn = () => {
               className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
               onChange={handleChange}
             />
-            {errors.password && (
-              <p className="text-red-500 text-sm mt-1">{errors.password}</p>
-            )}
+            
           </div>
 
           <button
@@ -121,9 +104,10 @@ const SignIn = () => {
           >
             Forgot password?
           </button>
-
+          {error && (
+              <p className="text-red-500 text-sm mt-1 flex justify-center items-center">{error.message || 'Something went wrong!'}</p>
+            )}
           <button
-            disabled={loading}
             type="submit"
             className="w-full py-3 px-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-medium rounded-lg hover:from-blue-600 hover:to-blue-700 focus:ring-4 focus:ring-blue-300 transition-all duration-200 disabled:opacity-50"
           >
@@ -142,9 +126,6 @@ const SignIn = () => {
           </p>
         </div>
 
-        {errors.error && (
-          <p className="text-red-500 mt-5 text-center">{errors.error}</p>
-        )}
       </div>
     </div>
   );
