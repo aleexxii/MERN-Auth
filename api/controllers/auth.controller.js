@@ -99,7 +99,7 @@ export const google = async (req, res, next) => {
       res.cookie("access_token", token, {httpOnly: true}).status(200).json(userInfo);
     }else{
       const generatedPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
-      
+      console.log('generatedPassword', generatedPassword);
       const hashedPassword = bcryptjs.hashSync(generatedPassword, 12);
       const newUser = new User({
         username: req.body.name.split(" ").join("").toLowerCase() + Math.random().toString(36).slice(-8),
